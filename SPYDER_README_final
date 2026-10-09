@@ -1,0 +1,32 @@
+# Organism- and input-flexible Spyder workflow
+
+## Run
+
+1. Keep `spyder_app.py`, `spyder_compat.py`, `spyder_analysis.py`, `spyder_input.py`, and `requirements-spyder.txt` together.
+2. Install the listed packages in the Python environment used by Spyder.
+3. Open `spyder_app.py` in Spyder and press **F5**.
+4. At the prompt, enter a CSV, TSV/TXT, XLSX, or XLS input path. Press Enter to use the example CSV.
+5. Select the gene ID field and whether the expression data are wide or long. Choose the expression columns/value field, label the time points, and identify the expression scale. The wizard accepts different header names; the analysis uses a normalized internal schema.
+6. Confirm the likely organism or enter its scientific name/KEGG organism code. Organism-specific NCBI, UniProt, and KEGG requests then use that selection where supported.
+
+## Input layouts
+
+**Wide:** one row per gene and one expression column per sample/time point. Sample replicates can share a time-point label; their values are averaged for the descriptive trend screen.
+
+**Long:** one row per gene/time point measurement, with separate gene ID, time point, and expression-value columns. Repeated gene/time rows are averaged.
+
+At least two time points and non-negative numeric expression values are required. The gene ID column and expression/time columns can have arbitrary names because they are selected in the wizard. Time labels are inferred from common headers such as `TPM_18hr`; otherwise, the user supplies a label.
+
+## Organism handling
+
+The app can infer an organism from an organism/species metadata column, a KEGG-prefixed ID such as `hsa:10458`, recognized Ensembl ID prefixes, or the known `PAS_` locus format. It asks for confirmation. For ambiguous IDs, enter the organism name or KEGG code. IDs such as gene symbols and numeric identifiers do not uniquely identify a species, so a user-confirmed organism is needed. If the organism is not available in KEGG, expression analysis and other annotations can run, but organism-specific KEGG mapping is skipped.
+
+KEGG accepts organism codes and supports conversion for selected external identifier namespaces; mapping still depends on the selected organism and IDs being represented in KEGG. NCBI and UniProt searches are taxonomy-restricted when a taxonomy ID can be resolved. If it cannot, the app warns that results may include other species.
+
+## Analysis limits
+
+The workflow compares the selected reference time point against each other time point, calculates fold-change screens, and produces trend summaries and heatmaps. Replicate measurements are averaged for these outputs; this script does not fit a replicate-aware differential-expression model. A statistical volcano plot needs replicate-aware p-values/FDR. Use replicate-level raw counts with an appropriate DE method for inferential differential expression.
+
+## Outputs
+
+Tables and plots are saved under `spyder_outputs`: pairwise comparisons, all-gene trend summary, candidate genes, expression heatmap, explanatory volcano placeholder, annotation tables, KEGG results, and selected colored pathway images. Matplotlib plots appear in Spyder's Plots pane when the Inline graphics backend is enabled. The selected KEGG page also opens in a Qt WebEngine window if Spyder's Qt WebEngine package is available.
